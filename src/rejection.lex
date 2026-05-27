@@ -15,6 +15,7 @@ type RejectionReason =
   | SymbolNotAllowed(Str)
   | SideNotAllowed(Str)
   | FixConformanceFailure(List[Str])
+  | PositionViolation(Str)
   | InternalError(Str)
 
 fn describe(r :: RejectionReason) -> Str {
@@ -34,6 +35,8 @@ fn describe(r :: RejectionReason) -> Str {
             if acc == "" { m }
             else { str.concat(acc, str.concat("; ", m)) }
           })),
+    PositionViolation(msg) =>
+      str.concat("position violation: ", msg),
     InternalError(msg) =>
       str.concat("internal error: ", msg),
   }
