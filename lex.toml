@@ -5,3 +5,4 @@ lex     = "0.9.4"
 [dependencies]
 lex-money  = { path = "../lex-money" }
 lex-fix    = { path = "../lex-fix" }
+lex-trail  = { path = "../lex-trail" }
