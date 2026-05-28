@@ -18,6 +18,7 @@ type RejectionReason =
   | PositionViolation(Str)
   | OrderNotCancelable(Str)
   | InternalError(Str)
+  | PriceToleranceBreached(Str, Str, Int)  # (order_price, ref_price, deviation_bps)
 
 fn describe(r :: RejectionReason) -> Str {
   match r {
@@ -42,5 +43,9 @@ fn describe(r :: RejectionReason) -> Str {
       str.concat("order not cancelable in state: ", state),
     InternalError(msg) =>
       str.concat("internal error: ", msg),
+    PriceToleranceBreached(op, rp, bps) =>
+      str.concat("price tolerance breached: order=", str.concat(op,
+        str.concat(" ref=", str.concat(rp,
+          str.concat(" deviation=", str.concat(int.to_str(bps), "bps")))))),
   }
 }
