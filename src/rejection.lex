@@ -16,6 +16,7 @@ type RejectionReason =
   | SideNotAllowed(Str)
   | FixConformanceFailure(List[Str])
   | PositionViolation(Str)
+  | OrderNotCancelable(Str)
   | InternalError(Str)
 
 fn describe(r :: RejectionReason) -> Str {
@@ -37,6 +38,8 @@ fn describe(r :: RejectionReason) -> Str {
           })),
     PositionViolation(msg) =>
       str.concat("position violation: ", msg),
+    OrderNotCancelable(state) =>
+      str.concat("order not cancelable in state: ", state),
     InternalError(msg) =>
       str.concat("internal error: ", msg),
   }
