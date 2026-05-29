@@ -1,12 +1,23 @@
 # tests for src/trail_kinds.lex
 
 import "std.list" as list
+
 import "../src/trail_kinds" as kinds
 
-fn pass() -> Result[Unit, Str] { Ok(()) }
-fn fail(why :: Str) -> Result[Unit, Str] { Err(why) }
+fn pass() -> Result[Unit, Str] {
+  Ok(())
+}
+
+fn fail(why :: Str) -> Result[Unit, Str] {
+  Err(why)
+}
+
 fn assert_true(cond :: Bool, label :: Str) -> Result[Unit, Str] {
-  if cond { pass() } else { fail(label) }
+  if cond {
+    pass()
+  } else {
+    fail(label)
+  }
 }
 
 fn test_validated_kind() -> Result[Unit, Str] {
@@ -29,17 +40,15 @@ fn test_kinds_are_distinct() -> Result[Unit, Str] {
 }
 
 fn suite() -> List[Result[Unit, Str]] {
-  [
-    test_validated_kind(),
-    test_accepted_kind(),
-    test_rejected_kind(),
-    test_kinds_are_distinct(),
-  ]
+  [test_validated_kind(), test_accepted_kind(), test_rejected_kind(), test_kinds_are_distinct()]
 }
 
 fn run_all() -> Int {
-  list.fold(suite(), 0,
-    fn (n :: Int, r :: Result[Unit, Str]) -> Int {
-      match r { Ok(_) => n, Err(_) => n + 1 }
-    })
+  list.fold(suite(), 0, fn (n :: Int, r :: Result[Unit, Str]) -> Int {
+    match r {
+      Ok(_) => n,
+      Err(_) => n + 1,
+    }
+  })
 }
+
