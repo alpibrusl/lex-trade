@@ -13,36 +13,35 @@
 # Effects: none.
 
 import "std.list" as list
-import "std.str"  as str
+
+import "std.str" as str
 
 import "lex-money/src/decimal" as d
 
-import "./order"      as order
-import "./limit"      as limit
+import "./order" as order
+
+import "./limit" as limit
+
 import "./validation" as v
-import "./rejection"  as rejection
 
-fn validate_replace(
-  orig    :: order.Order,
-  amended :: order.Order,
-  lim     :: limit.RiskLimit,
-  sender  :: Str,
-  target  :: Str
-) -> v.ValidationResult {
-  # Rule 1: side cannot change
+import "./rejection" as rejection
+
+fn validate_replace(orig :: order.Order, amended :: order.Order, lim :: limit.RiskLimit, sender :: Str, target :: Str) -> v.ValidationResult {
   let side_changed := match orig.side {
-    OrderBuy  => match amended.side { OrderBuy => false, OrderSell => true },
-    OrderSell => match amended.side { OrderBuy => true,  OrderSell => false },
+    OrderBuy(_) => match amended.side {
+      OrderBuy(_) => false,
+      OrderSell(_) => true,
+    },
+    OrderSell(_) => match amended.side {
+      OrderBuy(_) => true,
+      OrderSell(_) => false,
+    },
   }
-
   if side_changed {
     Rejected([FixConformanceFailure(["side cannot be changed on a cancel/replace request"])])
   } else {
-    # Rule 2: full pre-trade gate on the amended order
-    # Symbol and account must also stay the same; catch via FixConformanceFailure
-    let symbol_changed  := orig.symbol  != amended.symbol
+    let symbol_changed := orig.symbol != amended.symbol
     let account_changed := orig.account != amended.account
-
     if symbol_changed {
       Rejected([FixConformanceFailure(["symbol cannot be changed on a cancel/replace request"])])
     } else {
@@ -54,3 +53,4 @@ fn validate_replace(
     }
   }
 }
+

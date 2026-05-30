@@ -6,46 +6,30 @@
 #
 # Effects: none.
 
-import "std.str"  as str
-import "std.int"  as int
+import "std.str" as str
+
+import "std.int" as int
+
 import "std.list" as list
 
-type RejectionReason =
-    ExceedsMaxQty(Int, Int)
-  | SymbolNotAllowed(Str)
-  | SideNotAllowed(Str)
-  | FixConformanceFailure(List[Str])
-  | PositionViolation(Str)
-  | OrderNotCancelable(Str)
-  | InternalError(Str)
-  | PriceToleranceBreached(Str, Str, Int)  # (order_price, ref_price, deviation_bps)
+type RejectionReason = ExceedsMaxQty((Int, Int)) | SymbolNotAllowed(Str) | SideNotAllowed(Str) | FixConformanceFailure(List[Str]) | PositionViolation(Str) | OrderNotCancelable(Str) | InternalError(Str) | PriceToleranceBreached((Str, Str, Int))
 
 fn describe(r :: RejectionReason) -> Str {
   match r {
-    ExceedsMaxQty(qty, max) =>
-      str.concat("quantity ",
-        str.concat(int.to_str(qty),
-          str.concat(" exceeds limit of ", int.to_str(max)))),
-    SymbolNotAllowed(sym) =>
-      str.concat("symbol not allowed: ", sym),
-    SideNotAllowed(side) =>
-      str.concat("side not allowed: ", side),
-    FixConformanceFailure(msgs) =>
-      str.concat("FIX conformance failure: ",
-        list.fold(msgs, "",
-          fn (acc :: Str, m :: Str) -> Str {
-            if acc == "" { m }
-            else { str.concat(acc, str.concat("; ", m)) }
-          })),
-    PositionViolation(msg) =>
-      str.concat("position violation: ", msg),
-    OrderNotCancelable(state) =>
-      str.concat("order not cancelable in state: ", state),
-    InternalError(msg) =>
-      str.concat("internal error: ", msg),
-    PriceToleranceBreached(op, rp, bps) =>
-      str.concat("price tolerance breached: order=", str.concat(op,
-        str.concat(" ref=", str.concat(rp,
-          str.concat(" deviation=", str.concat(int.to_str(bps), "bps")))))),
+    ExceedsMaxQty(qty, max) => str.concat("quantity ", str.concat(int.to_str(qty), str.concat(" exceeds limit of ", int.to_str(max)))),
+    SymbolNotAllowed(sym) => str.concat("symbol not allowed: ", sym),
+    SideNotAllowed(side) => str.concat("side not allowed: ", side),
+    FixConformanceFailure(msgs) => str.concat("FIX conformance failure: ", list.fold(msgs, "", fn (acc :: Str, m :: Str) -> Str {
+      if acc == "" {
+        m
+      } else {
+        str.concat(acc, str.concat("; ", m))
+      }
+    })),
+    PositionViolation(msg) => str.concat("position violation: ", msg),
+    OrderNotCancelable(state) => str.concat("order not cancelable in state: ", state),
+    InternalError(msg) => str.concat("internal error: ", msg),
+    PriceToleranceBreached(op, rp, bps) => str.concat("price tolerance breached: order=", str.concat(op, str.concat(" ref=", str.concat(rp, str.concat(" deviation=", str.concat(int.to_str(bps), "bps")))))),
   }
 }
+

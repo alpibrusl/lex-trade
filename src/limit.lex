@@ -16,20 +16,10 @@
 
 import "std.list" as list
 
-type RiskLimit = {
-  max_order_qty    :: Int,
-  max_notional_str :: Str,
-  allowed_symbols  :: List[Str],
-  allowed_sides    :: List[Str],
-}
+type RiskLimit = { max_order_qty :: Int, max_notional_str :: Str, allowed_symbols :: List[Str], allowed_sides :: List[Str] }
 
 fn default_limits() -> RiskLimit {
-  {
-    max_order_qty:    10000,
-    max_notional_str: "5000000.00",
-    allowed_symbols:  [],
-    allowed_sides:    ["buy", "sell"],
-  }
+  { max_order_qty: 10000, max_notional_str: "5000000.00", allowed_symbols: [], allowed_sides: ["buy", "sell"] }
 }
 
 fn within_qty(limit :: RiskLimit, qty :: Int) -> Bool {
@@ -40,16 +30,23 @@ fn symbol_allowed(limit :: RiskLimit, symbol :: Str) -> Bool {
   if list.is_empty(limit.allowed_symbols) {
     true
   } else {
-    list.fold(limit.allowed_symbols, false,
-      fn (acc :: Bool, s :: Str) -> Bool {
-        if acc { true } else { s == symbol }
-      })
+    list.fold(limit.allowed_symbols, false, fn (acc :: Bool, s :: Str) -> Bool {
+      if acc {
+        true
+      } else {
+        s == symbol
+      }
+    })
   }
 }
 
 fn side_allowed(limit :: RiskLimit, side :: Str) -> Bool {
-  list.fold(limit.allowed_sides, false,
-    fn (acc :: Bool, s :: Str) -> Bool {
-      if acc { true } else { s == side }
-    })
+  list.fold(limit.allowed_sides, false, fn (acc :: Bool, s :: Str) -> Bool {
+    if acc {
+      true
+    } else {
+      s == side
+    }
+  })
 }
+

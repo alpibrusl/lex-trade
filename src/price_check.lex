@@ -16,74 +16,50 @@ import "lex-money/src/decimal" as d
 
 import "lex-positions/src/position" as pos
 
-import "./order"     as order
+import "./order" as order
+
 import "./rejection" as rejection
 
-type PriceTolerance = {
-  max_deviation_bps :: Int,
-}
-
-type PriceCheckResult =
-    PriceOk
-  | PriceRejected(rejection.RejectionReason)
+type PriceTolerance = { max_deviation_bps :: Int }
 
 fn default_tolerance() -> PriceTolerance {
-  { max_deviation_bps: 200 }  # 2% default
+  { max_deviation_bps: 200 }
 }
 
-fn check_price_tolerance(
-  o         :: order.Order,
-  ref_price :: d.Decimal,
-  tolerance :: PriceTolerance
-) -> PriceCheckResult {
+fn check_price_tolerance(o :: order.Order, ref_price :: d.Decimal, tolerance :: PriceTolerance) -> Result[Unit, rejection.RejectionReason] {
   let limit_price_str := match o.kind {
-    MarketOrder          => None,
-    LimitOrder(p)        => Some(p),
-    StopOrder(_)         => None,
+    MarketOrder(_) => None,
+    LimitOrder(p) => Some(p),
+    StopOrder(_) => None,
     StopLimitOrder(p, _) => Some(p),
   }
   match limit_price_str {
-    None      => PriceOk,
+    None => Ok(()),
     Some(pstr) => match pos.parse_price(pstr) {
-      None           => PriceRejected(rejection.InternalError("unparseable limit price: " + pstr)),
+      None => Err(rejection.InternalError("unparseable limit price: " + pstr)),
       Some(ord_price) => check_deviation(ord_price, ref_price, tolerance.max_deviation_bps, pstr),
     },
   }
 }
 
 # ---- Internal -------------------------------------------------------
-
-fn check_deviation(
-  ord_price  :: d.Decimal,
-  ref_price  :: d.Decimal,
-  max_bps    :: Int,
-  price_str  :: Str
-) -> PriceCheckResult {
-  # abs_diff = |ord_price - ref_price|
-  let diff     := d.sub(ord_price, ref_price)
+fn check_deviation(ord_price :: d.Decimal, ref_price :: d.Decimal, max_bps :: Int, price_str :: Str) -> Result[Unit, rejection.RejectionReason] {
+  let diff := d.sub(ord_price, ref_price)
   let abs_diff := d.abs(diff)
-
-  # cross-multiply to avoid division:
-  #   deviation_bps > max_bps
-  #   ⟺ abs_diff * 10000 > ref_price * max_bps
   let lhs := d.mul(abs_diff, d.from_int(10000))
   let rhs := d.mul(d.abs(ref_price), d.from_int(max_bps))
-
   if d.gt(lhs, rhs) {
-    # compute approximate integer bps for the rejection payload
     let approx_bps := approx_bps_int(abs_diff, ref_price)
-    let ref_str    := pos.decimal_to_str(ref_price)
-    PriceRejected(rejection.PriceToleranceBreached(price_str, ref_str, approx_bps))
+    let ref_str := pos.decimal_to_str(ref_price)
+    Err(rejection.PriceToleranceBreached(price_str, ref_str, approx_bps))
   } else {
-    PriceOk
+    Ok(())
   }
 }
 
 fn approx_bps_int(abs_diff :: d.Decimal, ref_price :: d.Decimal) -> Int {
-  # Scale both to the same exponent to get an integer ratio.
-  # bps = abs_diff * 10000 / ref_price — computed as integer after alignment.
   let diff_c := abs_diff.coefficient
-  let ref_c  := ref_price.coefficient
+  let ref_c := ref_price.coefficient
   let exp_diff := abs_diff.exponent - ref_price.exponent
   if exp_diff == 0 {
     diff_c * 10000 / ref_c
@@ -95,3 +71,4 @@ fn approx_bps_int(abs_diff :: d.Decimal, ref_price :: d.Decimal) -> Int {
     }
   }
 }
+
