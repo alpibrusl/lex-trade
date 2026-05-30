@@ -28,6 +28,7 @@ The core (`validation.lex`) is **pure**: no effects, no I/O. The effectful shell
 - **`src/rejection.lex`** — `RejectionReason` ADT (`ExceedsMaxQty`, `SymbolNotAllowed`, `SideNotAllowed`, `FixConformanceFailure`, `InternalError`) with human-readable `describe`.
 - **`src/validation.lex`** — pure validation pipeline; `ValidationResult = Accepted | Rejected`; `is_accepted`, `is_rejected`, `accepted_order`.
 - **`src/validation_io.lex`** — effectful `[io]` wrapper, stub for lex-trail logging.
+- **`src/routing.lex`** — smart order routing. `RoutingStrategy` (`BestPrice`/`MinCost`/`Sweep`/`DirectTo`); `select_venue` picks a destination from venue-tagged `Quote`s; `split_order` divides a parent into per-venue child orders (quantity-conserving); `validate_split` runs every child through the full pre-trade gate atomically — any rejected child fails the whole split. Venue identity is `lex-fix/src/venue`.
 - **`examples/pre_trade_check.lex`** — end-to-end worked example: agent order → validation → result string.
 
 ## Usage
