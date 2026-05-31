@@ -1,7 +1,7 @@
 # Tests for src/cancel.lex and src/order_store.lex
 #
 # Uses in-memory SQLite.
-# Effects: [orders, sql, fs_write]
+# Effects: [sql, fs_write]
 
 import "std.list" as list
 
@@ -35,7 +35,7 @@ fn assert_true(cond :: Bool, label :: Str) -> Result[Unit, Str] {
   }
 }
 
-fn open_db() -> [orders, sql, fs_write] Result[conn.ConnDb, Str] {
+fn open_db() -> [sql, fs_write] Result[conn.ConnDb, Str] {
   match conn.connect_sqlite(":memory:") {
     Err(err) => Err(dbe.message(err)),
     Ok(db) => match ostore.init(db) {
@@ -49,7 +49,7 @@ fn price(c :: Int, e :: Int) -> d.Decimal {
   d.decimal(c, e)
 }
 
-fn make_cancel(db :: conn.ConnDb, cl_ord_id :: Str, orig :: Str, account :: Str) -> [orders, sql] Result[Unit, Str] {
+fn make_cancel(db :: conn.ConnDb, cl_ord_id :: Str, orig :: Str, account :: Str) -> [sql] Result[Unit, Str] {
   match cancel.validate_cancel(db, cl_ord_id, orig, account, "AAPL", OrderBuy(()), 100, "20260528-10:00:00.000", "ALGO01", "EXCH01") {
     Ok(_) => Ok(()),
     Err(r) => Err("unexpected rejection"),
@@ -57,7 +57,7 @@ fn make_cancel(db :: conn.ConnDb, cl_ord_id :: Str, orig :: Str, account :: Str)
 }
 
 # ---- Tests ----------------------------------------------------------
-fn test_cancel_unknown_order_is_rejected() -> [orders, sql, fs_write] Result[Unit, Str] {
+fn test_cancel_unknown_order_is_rejected() -> [sql, fs_write] Result[Unit, Str] {
   match open_db() {
     Err(msg) => fail(msg),
     Ok(db) => match cancel.validate_cancel(db, "NEW-001", "ORIG-001", "ACC1", "AAPL", OrderBuy(()), 100, "20260528-10:00:00.000", "ALGO01", "EXCH01") {
@@ -68,7 +68,7 @@ fn test_cancel_unknown_order_is_rejected() -> [orders, sql, fs_write] Result[Uni
   }
 }
 
-fn test_cancel_new_order_succeeds() -> [orders, sql, fs_write] Result[Unit, Str] {
+fn test_cancel_new_order_succeeds() -> [sql, fs_write] Result[Unit, Str] {
   match open_db() {
     Err(msg) => fail(msg),
     Ok(db) => {
@@ -81,7 +81,7 @@ fn test_cancel_new_order_succeeds() -> [orders, sql, fs_write] Result[Unit, Str]
   }
 }
 
-fn test_cancel_partially_filled_succeeds() -> [orders, sql, fs_write] Result[Unit, Str] {
+fn test_cancel_partially_filled_succeeds() -> [sql, fs_write] Result[Unit, Str] {
   match open_db() {
     Err(msg) => fail(msg),
     Ok(db) => {
@@ -94,7 +94,7 @@ fn test_cancel_partially_filled_succeeds() -> [orders, sql, fs_write] Result[Uni
   }
 }
 
-fn test_cancel_filled_order_is_rejected() -> [orders, sql, fs_write] Result[Unit, Str] {
+fn test_cancel_filled_order_is_rejected() -> [sql, fs_write] Result[Unit, Str] {
   match open_db() {
     Err(msg) => fail(msg),
     Ok(db) => {
@@ -108,7 +108,7 @@ fn test_cancel_filled_order_is_rejected() -> [orders, sql, fs_write] Result[Unit
   }
 }
 
-fn test_cancel_canceled_order_is_rejected() -> [orders, sql, fs_write] Result[Unit, Str] {
+fn test_cancel_canceled_order_is_rejected() -> [sql, fs_write] Result[Unit, Str] {
   match open_db() {
     Err(msg) => fail(msg),
     Ok(db) => {
@@ -122,7 +122,7 @@ fn test_cancel_canceled_order_is_rejected() -> [orders, sql, fs_write] Result[Un
   }
 }
 
-fn test_order_store_apply_event_pipeline() -> [orders, sql, fs_write] Result[Unit, Str] {
+fn test_order_store_apply_event_pipeline() -> [sql, fs_write] Result[Unit, Str] {
   match open_db() {
     Err(msg) => fail(msg),
     Ok(db) => {
@@ -141,11 +141,11 @@ fn test_order_store_apply_event_pipeline() -> [orders, sql, fs_write] Result[Uni
   }
 }
 
-fn suite() -> [orders, sql, fs_write] List[Result[Unit, Str]] {
+fn suite() -> [sql, fs_write] List[Result[Unit, Str]] {
   [test_cancel_unknown_order_is_rejected(), test_cancel_new_order_succeeds(), test_cancel_partially_filled_succeeds(), test_cancel_filled_order_is_rejected(), test_cancel_canceled_order_is_rejected(), test_order_store_apply_event_pipeline()]
 }
 
-fn run_all() -> [orders, sql, fs_write] Int {
+fn run_all() -> [sql, fs_write] Int {
   list.fold(suite(), 0, fn (acc :: Int, r :: Result[Unit, Str]) -> Int {
     match r {
       Ok(_) => acc,

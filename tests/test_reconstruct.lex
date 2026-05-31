@@ -137,7 +137,7 @@ fn test_kind_roundtrip_limit() -> Result[Unit, Str] {
 }
 
 fn test_kind_roundtrip_stoplimit() -> Result[Unit, Str] {
-  let k := StopLimitOrder(("110.00", "105.00"))
+  let k := StopLimitOrder("110.00", "105.00")
   let reconstructed := rc.order_kind_from_parts(rc.order_type_str(k), rc.order_price_str(k), rc.order_stop_price_str(k))
   match reconstructed {
     StopLimitOrder(p, sp) => assert_true(p == "110.00" and sp == "105.00", "StopLimitOrder prices round-trip"),
