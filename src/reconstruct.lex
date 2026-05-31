@@ -71,7 +71,7 @@ fn order_type_str(k :: order.OrderKind) -> Str
     order_type_str(MarketOrder(())) => "Market",
     order_type_str(LimitOrder("100.00")) => "Limit",
     order_type_str(StopOrder("99.00")) => "Stop",
-    order_type_str(StopLimitOrder(("100.00", "95.00"))) => "StopLimit"
+    order_type_str(StopLimitOrder("100.00", "95.00")) => "StopLimit"
   }
 {
   match k {
@@ -99,7 +99,7 @@ fn order_price_str(k :: order.OrderKind) -> Str
 fn order_stop_price_str(k :: order.OrderKind) -> Str
   examples {
     order_stop_price_str(MarketOrder(())) => "",
-    order_stop_price_str(StopLimitOrder(("100.00", "95.00"))) => "95.00"
+    order_stop_price_str(StopLimitOrder("100.00", "95.00")) => "95.00"
   }
 {
   match k {
@@ -113,7 +113,7 @@ fn order_kind_from_parts(order_type :: Str, price_str :: Str, stop_str :: Str) -
     order_kind_from_parts("Market", "", "") => MarketOrder(()),
     order_kind_from_parts("Limit", "100.00", "") => LimitOrder("100.00"),
     order_kind_from_parts("Stop", "99.00", "") => StopOrder("99.00"),
-    order_kind_from_parts("StopLimit", "100.00", "95.00") => StopLimitOrder(("100.00", "95.00"))
+    order_kind_from_parts("StopLimit", "100.00", "95.00") => StopLimitOrder("100.00", "95.00")
   }
 {
   if order_type == "Stop" {
@@ -130,7 +130,7 @@ fn order_kind_from_parts(order_type :: Str, price_str :: Str, stop_str :: Str) -
         if str.is_empty(stop_str) {
           MarketOrder(())
         } else {
-          StopLimitOrder((price_str, stop_str))
+          StopLimitOrder(price_str, stop_str)
         }
       }
     } else {
@@ -218,7 +218,7 @@ fn decode_list_item[R](row :: R) -> Str {
 # ---- List item store -----------------------------------------------
 
 fn insert_list_items(db :: Db, entry_id :: Str, list_name :: Str, items :: List[Str]) -> [sql] Unit {
-  let __r := list.fold(items, (), fn (acc :: Unit, item :: Str) -> Unit {
+  let __r := list.fold(items, (), fn (acc :: Unit, item :: Str) -> [sql] Unit {
     let __ins := sql.exec(db, "INSERT INTO reconstruct_list(entry_id, list_name, item) VALUES (?, ?, ?)", [PStr(entry_id), PStr(list_name), PStr(item)])
     ()
   })
