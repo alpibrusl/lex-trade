@@ -2,9 +2,10 @@
 name    = "lex-trade"
 version = "0.1.0"
 lex     = "0.9.7"
+
 [dependencies]
-lex-money     = { path = "../lex-money" }
-lex-fix       = { path = "../lex-fix" }
-lex-trail     = { path = "../lex-trail" }
-lex-orm       = { path = "../lex-orm" }
-lex-positions = { path = "../lex-positions" }
+lex-money     = { git = "https://github.com/alpibrusl/lex-money" }
+lex-fix       = { git = "https://github.com/alpibrusl/lex-fix" }
+lex-trail     = { git = "https://github.com/alpibrusl/lex-trail" }
+lex-orm       = { git = "https://github.com/alpibrusl/lex-orm" }
+lex-positions = { git = "https://github.com/alpibrusl/lex-positions" }

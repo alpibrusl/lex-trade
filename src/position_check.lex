@@ -39,7 +39,7 @@ type PositionCheckConfig = { max_notional :: d.Decimal, allow_flip :: Bool }
 
 type PositionCheckResult = PassedPositionCheck(Unit) | FailedPositionCheck(rejection.RejectionReason)
 
-fn check_position(db :: conn.ConnDb, config :: PositionCheckConfig, o :: order.Order, price_str :: Str) -> [positions, sql] PositionCheckResult {
+fn check_position(db :: conn.ConnDb, config :: PositionCheckConfig, o :: order.Order, price_str :: Str) -> [sql] PositionCheckResult {
   let key := { account: o.account, symbol: o.symbol }
   match pstore.fetch(db, key) {
     Err(err) => FailedPositionCheck(InternalError(str.concat("position fetch error: ", dbe.message(err)))),

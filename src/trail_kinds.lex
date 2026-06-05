@@ -18,3 +18,15 @@ fn order_rejected() -> Str {
   "trade.order.rejected"
 }
 
+fn cancel_requested() -> Str {
+  "trade.cancel.requested"
+}
+
+fn replace_accepted() -> Str {
+  "trade.replace.accepted"
+}
+
+fn replace_rejected() -> Str {
+  "trade.replace.rejected"
+}
+
