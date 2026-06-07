@@ -46,12 +46,13 @@ fn is_terminal(state :: OrderState) -> Bool
 fn is_cancelable(state :: OrderState) -> Bool
   examples {
     is_cancelable(New(())) => true,
-    is_cancelable(PendingNew(())) => false,
+    is_cancelable(PendingNew(())) => true,
     is_cancelable(Canceled(0)) => false
   }
 {
   match state {
     New(_) => true,
+    PendingNew(_) => true,
     PartiallyFilled(_, _) => true,
     PendingCancel(_) => true,
     _ => false,
