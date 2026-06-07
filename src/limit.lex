@@ -19,7 +19,7 @@ import "std.list" as list
 type RiskLimit = { max_order_qty :: Int, max_notional_str :: Str, allowed_symbols :: List[Str], allowed_sides :: List[Str] }
 
 fn default_limits() -> RiskLimit {
-  { max_order_qty: 10000, max_notional_str: "5000000.00", allowed_symbols: [], allowed_sides: ["buy", "sell"] }
+  { max_order_qty: 1000000, max_notional_str: "500000000.00", allowed_symbols: [], allowed_sides: ["buy", "sell"] }
 }
 
 fn within_qty(limit :: RiskLimit, qty :: Int) -> Bool {
