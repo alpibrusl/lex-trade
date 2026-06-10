@@ -17,6 +17,8 @@
 
 import "std.str" as str
 
+import "std.time" as time
+
 import "std.int" as int
 
 import "std.list" as list
@@ -114,6 +116,14 @@ fn validate_and_log(o :: order.Order, lim :: limit.RiskLimit, ref_price :: Optio
 # (compute with `lex sig-id src/validation.lex:validate`). Pass "" to
 # skip provenance tracking.
 fn validate_log_and_record(o :: order.Order, lim :: limit.RiskLimit, ref_price :: Option[d.Decimal], tolerance :: pc.PriceTolerance, sender :: Str, target :: Str, log :: trail_log.Log, algo_sig_id :: Str) -> [sql, time] LogAndRecord {
+  validate_log_and_record_at(o, lim, ref_price, tolerance, sender, target, log, algo_sig_id, time.now_ms())
+}
+
+# validate_log_and_record_at — deterministic variant: trail timestamps come
+# from the caller (sim-time) instead of the wall clock, so the emitted
+# order.validated / order.accepted / order.rejected events are content-
+# addressed reproducibly. Effect row is [sql] only — no clock access.
+fn validate_log_and_record_at(o :: order.Order, lim :: limit.RiskLimit, ref_price :: Option[d.Decimal], tolerance :: pc.PriceTolerance, sender :: Str, target :: Str, log :: trail_log.Log, algo_sig_id :: Str, ts_ms :: Int) -> [sql] LogAndRecord {
   let price_rejected := match ref_price {
     None => None,
     Some(rp) => match pc.check_price_tolerance(o, rp, tolerance) {
@@ -134,13 +144,13 @@ fn validate_log_and_record(o :: order.Order, lim :: limit.RiskLimit, ref_price :
     Accepted(_) => "{\"result\":\"Accepted\"}",
     Rejected(vs) => rejection_payload(vs),
   }
-  match trail_log.append(log, kinds.order_validated(), None, ctx_payload) {
+  match trail_log.append_at(log, kinds.order_validated(), None, ctx_payload, ts_ms) {
     Err(_) => {
-      let __o := trail_log.append(log, outcome_kind, None, outcome_payload)
+      let __o := trail_log.append_at(log, outcome_kind, None, outcome_payload, ts_ms)
       { result: result, entry_id: "" }
     },
     Ok(ctx_evt) => {
-      let __o := trail_log.append(log, outcome_kind, Some(ctx_evt.id), outcome_payload)
+      let __o := trail_log.append_at(log, outcome_kind, Some(ctx_evt.id), outcome_payload, ts_ms)
       let __rc := rc.write_reconstruct(log.db, ctx_evt.id, o, lim, ref_price, sender, target, result, algo_sig_id, ctx_evt.ts_ms)
       { result: result, entry_id: ctx_evt.id }
     },
