@@ -1,5 +1,9 @@
 # lex-trade
 
+[![CI](https://github.com/alpibrusl/lex-trade/actions/workflows/ci.yml/badge.svg)](https://github.com/alpibrusl/lex-trade/actions/workflows/ci.yml)
+
+**Part of the [Lex](https://lexlang.org) project** — Finance · [Manifesto](https://lexlang.org/manifesto) · [All packages](https://lexlang.org)
+
 Pre-trade order validation for Lex. The gate between an agent's intent and the exchange.
 
 An agent produces a typed `Order`. lex-trade validates it against risk limits, FIX-protocol conformance, position limits, margin, and price tolerance. The result is either `Accepted(NewOrderSingle)` — ready for the exchange adapter — or `Rejected(violations)` — with every failure reason named and typed.
