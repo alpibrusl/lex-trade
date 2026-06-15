@@ -157,3 +157,4 @@ fn run_all() -> [sql, fs_write, time] Int {
     }
   })
 }
+
