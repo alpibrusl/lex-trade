@@ -151,7 +151,7 @@ fn validate_log_and_record_at(o :: order.Order, lim :: limit.RiskLimit, ref_pric
     },
     Ok(ctx_evt) => {
       let __o := trail_log.append_at(log, outcome_kind, Some(ctx_evt.id), outcome_payload, ts_ms)
-      let __rc := rc.write_reconstruct(log.db, ctx_evt.id, o, lim, ref_price, sender, target, result, algo_sig_id, ctx_evt.ts_ms)
+      let __rc := rc.write_reconstruct(log.db.handle, ctx_evt.id, o, lim, ref_price, sender, target, result, algo_sig_id, ctx_evt.ts_ms)
       { result: result, entry_id: ctx_evt.id }
     },
   }
