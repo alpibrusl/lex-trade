@@ -57,7 +57,7 @@ fn test_reconstruct_accepted() -> [sql, fs_write, time] Result[Unit, Str] {
       if str.is_empty(lar.entry_id) {
         fail("entry_id should be non-empty on successful trail append")
       } else {
-        match rc.reconstruct(log.db, lar.entry_id) {
+        match rc.reconstruct(log.db.handle, lar.entry_id) {
           Err(e) => fail(str.concat("reconstruct failed: ", e)),
           Ok(rec) => {
             let replay_result := rc.replay(rec)
@@ -87,7 +87,7 @@ fn test_reconstruct_rejected() -> [sql, fs_write, time] Result[Unit, Str] {
       if str.is_empty(lar.entry_id) {
         fail("entry_id should be non-empty even for rejected orders")
       } else {
-        match rc.reconstruct(log.db, lar.entry_id) {
+        match rc.reconstruct(log.db.handle, lar.entry_id) {
           Err(e) => fail(str.concat("reconstruct failed for rejected order: ", e)),
           Ok(rec) => {
             let replay_result := rc.replay(rec)
@@ -117,8 +117,8 @@ fn test_reconstruct_unknown_id() -> [sql, fs_write] Result[Unit, Str] {
   match trail_log.open_memory() {
     Err(e) => fail(str.concat("open_memory: ", e)),
     Ok(log) => {
-      let __init := rc.init_reconstruct(log.db)
-      match rc.reconstruct(log.db, "no-such-id") {
+      let __init := rc.init_reconstruct(log.db.handle)
+      match rc.reconstruct(log.db.handle, "no-such-id") {
         Ok(_) => fail("should return Err for unknown entry_id"),
         Err(_) => pass(),
       }
