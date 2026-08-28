@@ -83,3 +83,9 @@ lex-sor · lex-finance · lex-oms
 [dependencies]
 "lex-trade" = { git = "https://github.com/alpibrusl/lex-trade" }
 ```
+
+## License
+
+Copyright (c) 2026 lex-trade contributors.
+
+Licensed under the [EUPL-1.2](LICENSE) — the European Union Public Licence, as used across the `lex-*` ecosystem.
